@@ -29,7 +29,7 @@ OR = ImageTk.PhotoImage(Image.open('images/or.png').resize((74,74)))
 
 canvas = tk.Canvas(root, width=8192, height=8192, bg='white');canvas.pack(anchor=tk.NW)
 
-print('tklogicsim alpha (0.0.1-win64)')
+print('tklogicsim alpha (0.0.2-win64)')
 
 def render_circuit(circuit: Circuit):
     items = circuit.items
@@ -49,10 +49,10 @@ def render_circuit(circuit: Circuit):
         del tmp
 
     for wire in wires:
-        x0,y0,x1,y1 = items[wire[0]][1],items[wire[0]][2],items[wire[1]][1],items[wire[1]][2]
+        x0,y0,x1,y1 = items[wire[0]][1]+50,items[wire[0]][2]+50,items[wire[1]][1]+50,items[wire[1]][2]+50
         canvas.create_line(x0,y0,x1,y1,width=5)
 
-main_circuit = Circuit([('Input',0,0), ('Input',0,100), ('AND',200,50), ('Output',350,100)], [(0,2),(1,2),(2,3)])
+main_circuit = Circuit([('Input',0,0,[]), ('Input',0,100,[]), ('AND',200,50,[]), ('Output',350,100,[])], [(0,2),(1,2),(2,3)])
 
 render_circuit(main_circuit)
 
