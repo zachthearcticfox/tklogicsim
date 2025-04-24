@@ -35,28 +35,31 @@ canvas = tk.Canvas(root, width=8192, height=8192, bg='white')
 canvas.place(relx=0, rely=0, relwidth=1, relheight=1, anchor=tk.NW)
 root.tk.call('lower', str(canvas))
 
-print('tklogicsim alpha (0.0.2-win64)')
+print('tklogicsim')
 
 def render(circuit: Circuit):
     ##########
     #Blocks#
     ##########
-    loaded_blocks = []
+    loaded_blocks = [None]*len(circuit.items)
     c = 0
     for i in circuit.items:
-        match i[0]:
-            case 'Input':
-                loaded_blocks.append(tk.Button(root, image=INPUT_OFF))
-            case 'Output':
-                loaded_blocks.append(tk.Button(root, image=OUTPUT_OFF))
-            case 'AND':
-                loaded_blocks.append(tk.Button(root, image=AND))
-            case 'XOR':
-                loaded_blocks.append(tk.Button(root, image=XOR))
-            case 'NOT':
-                loaded_blocks.append(tk.Button(root, image=NOT))
-            case 'OR':
-                loaded_blocks.append(tk.Button(root, image=OR))
+        if i[0] == 'Input' and not i[3][0]:
+            loaded_blocks[c] = tk.Button(root, image=INPUT_OFF)
+        elif i[0] == 'Output' and not i[3][0]:
+            loaded_blocks[c] = tk.Button(root, image=OUTPUT_OFF)
+        if i[0] == 'Input' and i[3][0]:
+            loaded_blocks[c] = tk.Button(root, image=INPUT_ON)
+        elif i[0] == 'Output' and i[3][0]:
+            loaded_blocks[c] = tk.Button(root, image=OUTPUT_ON)
+        elif i[0] == 'AND':
+            loaded_blocks[c] = tk.Button(root, image=AND)
+        elif i[0] == 'XOR':
+            loaded_blocks[c] = tk.Button(root, image=XOR)
+        elif i[0] == 'NOT':
+            loaded_blocks[c] = tk.Button(root, image=NOT)
+        elif i[0] == 'OR':
+            loaded_blocks[c] = tk.Button(root, image=OR)
 
         loaded_blocks[c].place(x=i[1], y=i[2])
         c += 1
@@ -65,15 +68,31 @@ def render(circuit: Circuit):
     #########
     #Wires#
     #########
+    loaded_wires = []
+    print('Render: ', end='')
     for i in circuit.wires:
         xy_input_a = (circuit.items[i[0]][1], circuit.items[i[0]][2])
         xy_output_b = (circuit.items[i[1]][1], circuit.items[i[1]][2])
-        print(xy_input_a, xy_output_b, sep=', ')
-        canvas.create_line(xy_input_a[0]+50,xy_input_a[1]+25,xy_output_b[0]+50,xy_output_b[1]+25, width=2)
+        print(xy_input_a, xy_output_b, sep=', ', end=' - ')
+        loaded_wires.append(canvas.create_line(xy_input_a[0]+50,xy_input_a[1]+25,xy_output_b[0]+50,xy_output_b[1]+25, width=2))
+    print('Render End')
 
-    return loaded_blocks
+    return (loaded_blocks, loaded_wires)
 
 main_circuit = Circuit([['Input',0,0,[False]], ['Input',0,75,[False]], ['AND',150,35,[]], ['Output',225,35,[False]]], [[0,2], [1,2], [2,3]])
-render(main_circuit)
+tk_rendered = render(main_circuit)
 
+def toggle_input_or_output(idx:int, circuit:Circuit):
+    global tk_rendered
+    if circuit.items[idx][3][0] == True:
+        circuit.items[idx][3][0] = False
+    else:
+        circuit.items[idx][3][0] = True
+    
+    for i in tk_rendered[0]:
+        i.destroy()
+    
+    canvas.delete('all')
+    tk_rendered = render(main_circuit)
+    
 root.mainloop()
