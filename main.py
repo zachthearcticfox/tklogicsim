@@ -1,10 +1,14 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 
+class TkLogicSimError(BaseException):
+    def __init__(self, msg):
+        self.msg = msg
+
 class Circuit:
     def __init__(self, pre_items: list = [], pre_wires: list = []):
         if type(pre_items) != list or type(pre_wires) != list:
-            raise Exception(f'Pre-items or Pre-wires are not a list')
+            raise TkLogicSimError(f'Pre-items or Pre-wires are not a list')
         self.items = pre_items
         self.wires = pre_wires
     
@@ -18,42 +22,58 @@ root = tk.Tk()
 root.geometry('768x512')
 root.title('tk-logicsim')
 
-INPUT_OFF = ImageTk.PhotoImage(Image.open('images/input_off.png').resize((74,74)))
-INPUT_ON = ImageTk.PhotoImage(Image.open('images/input_on.png').resize((74,74)))
-OUTPUT_OFF = ImageTk.PhotoImage(Image.open('images/output_off.png').resize((74,74)))
-OUTPUT_ON = ImageTk.PhotoImage(Image.open('images/output_on.png').resize((74,74)))
-AND = ImageTk.PhotoImage(Image.open('images/and.png').resize((74,74)))
-XOR = ImageTk.PhotoImage(Image.open('images/xor.png').resize((74,74)))
-NOT = ImageTk.PhotoImage(Image.open('images/not.png').resize((74,74)))
-OR = ImageTk.PhotoImage(Image.open('images/or.png').resize((74,74)))
+INPUT_OFF = ImageTk.PhotoImage(Image.open('images/input_off.png').resize((50,50)))
+INPUT_ON = ImageTk.PhotoImage(Image.open('images/input_on.png').resize((50,50)))
+OUTPUT_OFF = ImageTk.PhotoImage(Image.open('images/output_off.png').resize((50,50)))
+OUTPUT_ON = ImageTk.PhotoImage(Image.open('images/output_on.png').resize((50,50)))
+AND = ImageTk.PhotoImage(Image.open('images/and.png').resize((50,50)))
+XOR = ImageTk.PhotoImage(Image.open('images/xor.png').resize((50,50)))
+NOT = ImageTk.PhotoImage(Image.open('images/not.png').resize((50,50)))
+OR = ImageTk.PhotoImage(Image.open('images/or.png').resize((50,50)))
 
-canvas = tk.Canvas(root, width=8192, height=8192, bg='white');canvas.pack(anchor=tk.NW)
+canvas = tk.Canvas(root, width=8192, height=8192, bg='white')
+canvas.place(relx=0, rely=0, relwidth=1, relheight=1, anchor=tk.NW)
+root.tk.call('lower', str(canvas))
 
 print('tklogicsim alpha (0.0.2-win64)')
 
-def render_circuit(circuit: Circuit):
-    items = circuit.items
-    wires = circuit.wires
+def render(circuit: Circuit):
+    ##########
+    #Blocks#
+    ##########
+    loaded_blocks = []
+    c = 0
+    for i in circuit.items:
+        match i[0]:
+            case 'Input':
+                loaded_blocks.append(tk.Button(root, image=INPUT_OFF))
+            case 'Output':
+                loaded_blocks.append(tk.Button(root, image=OUTPUT_OFF))
+            case 'AND':
+                loaded_blocks.append(tk.Button(root, image=AND))
+            case 'XOR':
+                loaded_blocks.append(tk.Button(root, image=XOR))
+            case 'NOT':
+                loaded_blocks.append(tk.Button(root, image=NOT))
+            case 'OR':
+                loaded_blocks.append(tk.Button(root, image=OR))
 
-    loaded = []
+        loaded_blocks[c].place(x=i[1], y=i[2])
+        c += 1
+    c = 0
 
-    for item in items:
-        match item[0]:
-            case 'Input': tmp = tk.Button(root, image=INPUT_OFF); loaded.append(tk.Button(root, image=INPUT_OFF))
-            case 'Output': tmp = tk.Button(root, image=OUTPUT_OFF); loaded.append(tk.Button(root, image=INPUT_ON))
-            case 'AND': tmp = tk.Button(root, image=AND); loaded.append(tk.Button(root, image=AND))
-            case 'XOR': tmp = tk.Button(root, image=XOR); loaded.append(tk.Button(root, image=XOR))
-            case 'NOT': tmp = tk.Button(root, image=NOT); loaded.append(tk.Button(root, image=NOT))
-            case 'OR': tmp = tk.Button(root, image=OR); loaded.append(tk.Button(root, image=OR))
-        tmp.place(x=item[1], y=item[2])
-        del tmp
+    #########
+    #Wires#
+    #########
+    for i in circuit.wires:
+        xy_input_a = (circuit.items[i[0]][1], circuit.items[i[0]][2])
+        xy_output_b = (circuit.items[i[1]][1], circuit.items[i[1]][2])
+        print(xy_input_a, xy_output_b, sep=', ')
+        canvas.create_line(xy_input_a[0]+50,xy_input_a[1]+25,xy_output_b[0]+50,xy_output_b[1]+25, width=2)
 
-    for wire in wires:
-        x0,y0,x1,y1 = items[wire[0]][1]+50,items[wire[0]][2]+50,items[wire[1]][1]+50,items[wire[1]][2]+50
-        canvas.create_line(x0,y0,x1,y1,width=5)
+    return loaded_blocks
 
-main_circuit = Circuit([('Input',0,0,[]), ('Input',0,100,[]), ('AND',200,50,[]), ('Output',350,100,[])], [(0,2),(1,2),(2,3)])
-
-render_circuit(main_circuit)
+main_circuit = Circuit([['Input',0,0,[False]], ['Input',0,75,[False]], ['AND',150,35,[]], ['Output',225,35,[False]]], [[0,2], [1,2], [2,3]])
+render(main_circuit)
 
 root.mainloop()
