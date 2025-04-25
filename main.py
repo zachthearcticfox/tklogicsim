@@ -81,7 +81,7 @@ def render(circuit: Circuit):
 
     return (loaded_blocks, loaded_wires)
 
-main_circuit = Circuit([['Input',35,35,[False]], ['NOT',135,35,[]], ['Output',235,35,[False]]], [[0,1], [1,2]])
+main_circuit = Circuit([['Input',35,35,[False]], ['Input',35,135,[False]], ['OR',135,85,[False]], ['Output',235,85,[False]]], [[0,2], [1,2], [2,3]])
 tk_rendered = render(main_circuit)
 
 def toggle_input_or_output(idx:int, circuit:Circuit):
@@ -96,6 +96,5 @@ def toggle_input_or_output(idx:int, circuit:Circuit):
     
     canvas.delete('all')
     tk_rendered = render(main_circuit)
-    print(circuit.items, circuit.wires)
 
 root.mainloop()
