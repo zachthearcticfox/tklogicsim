@@ -1,5 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageTk
+import time
+import threading
 
 class TkLogicSimError(BaseException):
     def __init__(self, msg):
@@ -21,6 +23,14 @@ class Circuit:
 root = tk.Tk()
 root.geometry('768x512')
 root.title('tk-logicsim')
+
+tps = 20 # Max Ticks / Second
+
+if tps > 10000: raise TkLogicSimError(f'TPS is too high. ({tps})')
+if tps < 1: raise TkLogicSimError(f'TPS is too low ({tps})')
+
+te = 0 # Ticks Elapsed
+ttps = 0 # True Ticks / Second
 
 INPUT_OFF = ImageTk.PhotoImage(Image.open('images/input_off.png').resize((50,50)))
 INPUT_ON = ImageTk.PhotoImage(Image.open('images/input_on.png').resize((50,50)))
@@ -81,7 +91,7 @@ def render(circuit: Circuit):
 
     return (loaded_blocks, loaded_wires)
 
-main_circuit = Circuit([['Input',35,35,[False]], ['Input',35,135,[False]], ['OR',135,85,[False]], ['Output',235,85,[False]]], [[0,2], [1,2], [2,3]])
+main_circuit = Circuit([['Input',35,35,[False]], ['Output',135,35,[False]]], [[0,1]])
 tk_rendered = render(main_circuit)
 
 def toggle_input_or_output(idx:int, circuit:Circuit):
@@ -96,5 +106,35 @@ def toggle_input_or_output(idx:int, circuit:Circuit):
     
     canvas.delete('all')
     tk_rendered = render(main_circuit)
+
+def tick(circuit:Circuit, rendered_circuit:tuple):
+    for i in circuit.wires:
+        ...
+
+def looptick():
+    global te
+    while True:
+        time.sleep(1/tps)
+        root.title(f'tk-logicsim ({te} ticks elapsed) ({ttps}/{tps} tps)')
+        tick(circuit=main_circuit, rendered_circuit=tk_rendered)
+        te += 1
+    te = 0
+
+def truetps():
+    global te
+    global ttps
+    pte = te
+    while True:
+        time.sleep(0.5)
+        cte = te
+        ttps = 2 * (cte - pte)
+        pte = cte
+        
+
+tlooptick = threading.Thread(target=looptick, daemon=True)
+tlooptick.start()
+
+ttruetps = threading.Thread(target=truetps, daemon=True)
+ttruetps.start()
 
 root.mainloop()
