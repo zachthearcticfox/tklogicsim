@@ -91,7 +91,7 @@ def render(circuit: Circuit):
 
     return (loaded_blocks, loaded_wires)
 
-main_circuit = Circuit([['Input',35,35,[False]], ['Output',135,35,[False]]], [[0,1]])
+main_circuit = Circuit([['Input',35,35,[False,False]], ['Output',135,35,[False,False]]], [[0,1]])
 tk_rendered = render(main_circuit)
 
 def toggle_input_or_output(idx:int, circuit:Circuit):
