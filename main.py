@@ -62,6 +62,8 @@ def render(circuit: Circuit):
             loaded_blocks[c] = tk.Button(root, image=OR)
 
         loaded_blocks[c].place(x=i[1], y=i[2])
+
+        loaded_blocks[c].configure(command=lambda i=c: toggle_input_or_output(i, circuit))
         c += 1
     c = 0
 
@@ -79,11 +81,10 @@ def render(circuit: Circuit):
 
     return (loaded_blocks, loaded_wires)
 
-main_circuit = Circuit([['Input',0,0,[False]], ['Input',0,75,[False]], ['XOR',150,35,[]], ['Output',225,35,[False]]], [[0,2], [1,2], [2,3]])
+main_circuit = Circuit([['Input',35,35,[False]], ['NOT',135,35,[]], ['Output',235,35,[False]]], [[0,1], [1,2]])
 tk_rendered = render(main_circuit)
 
 def toggle_input_or_output(idx:int, circuit:Circuit):
-    print('finished')
     global tk_rendered
     if circuit.items[idx][3][0] == True:
         circuit.items[idx][3][0] = False
@@ -95,5 +96,6 @@ def toggle_input_or_output(idx:int, circuit:Circuit):
     
     canvas.delete('all')
     tk_rendered = render(main_circuit)
+    print(circuit.items, circuit.wires)
 
 root.mainloop()
