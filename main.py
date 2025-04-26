@@ -7,8 +7,10 @@ import json
 def bitwiseAND(a:bool, b:bool) -> bool:
     return a and b
 
+"""
 def bitwiseOR(a:bool, b:bool) -> bool:
     return a or b
+"""
 
 def bitwiseNOT(a:bool) -> bool:
     return not a
@@ -107,8 +109,8 @@ def render(circuit: Circuit) -> tuple:
 
     return (loaded_blocks, loaded_wires)
 
-citems = [['Input',35,35,[False,False]], ['Output',135,35,[False,False]]]
-cwires = [[0,1]]
+citems = [['Input',35,35,[False,False]], ['Input',35,135,[False,False]], ['OR',135,85,[False,False]], ['Output',235,85,[False,False]]] # i0 (top), i1 (bottom), o0 (output)
+cwires = [[0,2], [1,2], [2,3]]
 
 main_circuit = Circuit(citems, cwires)
 tk_rendered = render(main_circuit)
@@ -118,34 +120,43 @@ def toggle_input_or_output(idx:int, circuit:Circuit) -> None:
     if circuit.items[idx][3][0] == True:
         circuit.items[idx][3][0] = False
         circuit.items[idx][3][1] = False
+        tk_rendered[0][idx].configure(image=INPUT_OFF)
     else:
         circuit.items[idx][3][0] = True
         circuit.items[idx][3][1] = True
-    
-    for i in tk_rendered[0]:
-        i.destroy()
-    
-    canvas.delete('all')
-    tk_rendered = render(main_circuit)
+        tk_rendered[0][idx].configure(image=INPUT_ON)
 
 def tick(circuit:Circuit, rendered_circuit:tuple) -> None:
-    for i in circuit.wires:
-        circuit.items[i[1]][3][1] = circuit.items[i[0]][3][0]
+    for item in circuit.items:
+        if item[0] != 'Input':
+            item[3][1] = False
 
-    c = 0
-    for i in circuit.items:
-        i[3][0] = i[3][1]
-        if i[3][0] == True:
-            i[3][1] == True
-        
-        if i[0] == 'Input':
-            rendered_circuit[0][c].configure(image=INPUT_ON if i[3][0] == True else INPUT_OFF)
-        elif i[0] == 'Output':
-            rendered_circuit[0][c].configure(image=OUTPUT_ON if i[3][0] == True else OUTPUT_OFF)
-        else: ...
-        c += 1
-    c = 0
-    # print(circuit.items, circuit.wires)
+    inputs_to = [[] for _ in range(len(circuit.items))]
+
+    for wire in circuit.wires:
+        src, dst = wire
+        inputs_to[dst].append(src)
+
+    for idx, sources in enumerate(inputs_to):
+        if circuit.items[idx][0] == 'Input':
+            continue
+
+        if sources:
+            circuit.items[idx][3][1] = any(circuit.items[src][3][0] for src in sources)
+
+    for idx, item in enumerate(circuit.items):
+        item[3][0] = item[3][1]
+
+        try:
+            if item[0] == 'Input':
+                rendered_circuit[0][idx].configure(image=INPUT_ON if item[3][0] else INPUT_OFF)
+            elif item[0] == 'Output':
+                rendered_circuit[0][idx].configure(image=OUTPUT_ON if item[3][0] else OUTPUT_OFF)
+            else:
+                ...
+        except tk.TclError:
+            print('tick: button does not exist, skipping.')
+            pass
 
 
 def looptick() -> None:
