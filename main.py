@@ -35,9 +35,9 @@ class Circuit:
     def add_block(self, block: str, position: list) -> None:
         self.items.append((block, position, []))
 
-tpsstr = input('Enter TPS [15]: ') # Max Ticks / Second
+tpsstr = input('Enter TPS [15]: ')
 if tpsstr == '': tpsstr = 15
-tps = int(tpsstr)
+tps = int(tpsstr) # Max Ticks / Second
 
 root = tk.Tk()
 root.geometry('768x512')
