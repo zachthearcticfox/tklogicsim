@@ -2,6 +2,19 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import time
 import threading
+import json
+
+def bitwiseAND(a:bool, b:bool) -> bool:
+    return a and b
+
+def bitwiseOR(a:bool, b:bool) -> bool:
+    return a or b
+
+def bitwiseNOT(a:bool) -> bool:
+    return not a
+
+def bitwiseXOR(a:bool, b:bool) -> bool:
+    return a ^ b
 
 class TkLogicSimError(BaseException):
     def __init__(self, msg):
@@ -14,19 +27,21 @@ class Circuit:
         self.items = pre_items
         self.wires = pre_wires
     
-    def add_wire(self, item1: int, item2: int):
+    def add_wire(self, item1: int, item2: int) -> None:
         self.wires.append((item1, item2, []))
     
-    def add_block(self, block: str, position: list):
+    def add_block(self, block: str, position: list) -> None:
         self.items.append((block, position, []))
+
+tpsstr = input('Enter TPS [15]: ') # Max Ticks / Second
+if tpsstr == '': tpsstr = 15
+tps = int(tpsstr)
 
 root = tk.Tk()
 root.geometry('768x512')
 root.title('tk-logicsim')
 
-tps = 20 # Max Ticks / Second
-
-if tps > 10000: raise TkLogicSimError(f'TPS is too high. ({tps})')
+if tps > 20: raise TkLogicSimError(f'TPS is too high. ({tps})')
 if tps < 1: raise TkLogicSimError(f'TPS is too low ({tps})')
 
 te = 0 # Ticks Elapsed
@@ -45,9 +60,9 @@ canvas = tk.Canvas(root, width=8192, height=8192, bg='white')
 canvas.place(relx=0, rely=0, relwidth=1, relheight=1, anchor=tk.NW)
 root.tk.call('lower', str(canvas))
 
-print('tklogicsim')
+print('TK-Logicsim started')
 
-def render(circuit: Circuit):
+def render(circuit: Circuit) -> tuple:
     ##########
     #Blocks#
     ##########
@@ -91,15 +106,20 @@ def render(circuit: Circuit):
 
     return (loaded_blocks, loaded_wires)
 
-main_circuit = Circuit([['Input',35,35,[False,False]], ['Output',135,35,[False,False]]], [[0,1]])
+citems = [['Input',35,35,[False,False]], ['Output',135,35,[False,False]]]
+cwires = [[0,1]]
+
+main_circuit = Circuit(citems, cwires)
 tk_rendered = render(main_circuit)
 
-def toggle_input_or_output(idx:int, circuit:Circuit):
+def toggle_input_or_output(idx:int, circuit:Circuit) -> None:
     global tk_rendered
     if circuit.items[idx][3][0] == True:
         circuit.items[idx][3][0] = False
+        circuit.items[idx][3][1] = False
     else:
         circuit.items[idx][3][0] = True
+        circuit.items[idx][3][1] = True
     
     for i in tk_rendered[0]:
         i.destroy()
@@ -107,11 +127,27 @@ def toggle_input_or_output(idx:int, circuit:Circuit):
     canvas.delete('all')
     tk_rendered = render(main_circuit)
 
-def tick(circuit:Circuit, rendered_circuit:tuple):
+def tick(circuit:Circuit, rendered_circuit:tuple) -> None:
     for i in circuit.wires:
-        ...
+        circuit.items[i[1]][3][1] = circuit.items[i[0]][3][0]
 
-def looptick():
+    c = 0
+    for i in circuit.items:
+        i[3][0] = i[3][1]
+        if i[3][0] == True:
+            i[3][1] == True
+        
+        if i[0] == 'Input':
+            rendered_circuit[0][c].configure(image=INPUT_ON if i[3][0] == True else INPUT_OFF)
+        elif i[0] == 'Output':
+            rendered_circuit[0][c].configure(image=OUTPUT_ON if i[3][0] == True else OUTPUT_OFF)
+        else: ...
+        c += 1
+    c = 0
+    # print(circuit.items, circuit.wires)
+
+
+def looptick() -> None:
     global te
     while True:
         time.sleep(1/tps)
@@ -120,7 +156,7 @@ def looptick():
         te += 1
     te = 0
 
-def truetps():
+def truetps() -> None:
     global te
     global ttps
     pte = te
