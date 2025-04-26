@@ -40,6 +40,7 @@ tps = int(tpsstr)
 root = tk.Tk()
 root.geometry('768x512')
 root.title('tk-logicsim')
+root.configure(bg='#000000') 
 
 if tps > 20: raise TkLogicSimError(f'TPS is too high. ({tps})')
 if tps < 1: raise TkLogicSimError(f'TPS is too low ({tps})')
@@ -56,7 +57,7 @@ XOR = ImageTk.PhotoImage(Image.open('images/xor.png').resize((50,50)))
 NOT = ImageTk.PhotoImage(Image.open('images/not.png').resize((50,50)))
 OR = ImageTk.PhotoImage(Image.open('images/or.png').resize((50,50)))
 
-canvas = tk.Canvas(root, width=8192, height=8192, bg='white')
+canvas = tk.Canvas(root, width=8192, height=8192, bg='black')
 canvas.place(relx=0, rely=0, relwidth=1, relheight=1, anchor=tk.NW)
 root.tk.call('lower', str(canvas))
 
@@ -101,7 +102,7 @@ def render(circuit: Circuit) -> tuple:
         xy_input_a = (circuit.items[i[0]][1], circuit.items[i[0]][2])
         xy_output_b = (circuit.items[i[1]][1], circuit.items[i[1]][2])
         print(xy_input_a, xy_output_b, sep=', ', end=' - ')
-        loaded_wires.append(canvas.create_line(xy_input_a[0]+50,xy_input_a[1]+25,xy_output_b[0]+50,xy_output_b[1]+25, width=2))
+        loaded_wires.append(canvas.create_line(xy_input_a[0]+50,xy_input_a[1]+25,xy_output_b[0]+50,xy_output_b[1]+25, width=2, fill='#ffffff'))
     print('Render End')
 
     return (loaded_blocks, loaded_wires)
