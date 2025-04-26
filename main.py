@@ -72,13 +72,13 @@ def render(circuit: Circuit) -> tuple:
     loaded_blocks = [None]*len(circuit.items)
     c = 0
     for i in circuit.items:
-        if i[0] == 'Input' and not i[3][0]:
+        if i[0] == 'input' and not i[3][0]:
             loaded_blocks[c] = tk.Button(root, image=INPUT_OFF)
-        elif i[0] == 'Output' and not i[3][0]:
+        elif i[0] == 'output' and not i[3][0]:
             loaded_blocks[c] = tk.Button(root, image=OUTPUT_OFF)
-        if i[0] == 'Input' and i[3][0]:
+        if i[0] == 'input' and i[3][0]:
             loaded_blocks[c] = tk.Button(root, image=INPUT_ON)
-        elif i[0] == 'Output' and i[3][0]:
+        elif i[0] == 'output' and i[3][0]:
             loaded_blocks[c] = tk.Button(root, image=OUTPUT_ON)
         elif i[0] == 'AND':
             loaded_blocks[c] = tk.Button(root, image=AND)
@@ -109,7 +109,7 @@ def render(circuit: Circuit) -> tuple:
 
     return (loaded_blocks, loaded_wires)
 
-citems = [['Input',35,35,[False,False]], ['Input',35,135,[False,False]], ['OR',135,85,[False,False]], ['Output',235,85,[False,False]]] # i0 (top), i1 (bottom), o0 (output)
+citems = [['input',35,35,[False,False]], ['input',35,135,[False,False]], ['OR',135,85,[False,False]], ['output',235,85,[False,False]]] # i0 (top), i1 (bottom), o0 (output)
 cwires = [[0,2], [1,2], [2,3]]
 
 main_circuit = Circuit(citems, cwires)
@@ -128,7 +128,7 @@ def toggle_input_or_output(idx:int, circuit:Circuit) -> None:
 
 def tick(circuit:Circuit, rendered_circuit:tuple) -> None:
     for item in circuit.items:
-        if item[0] != 'Input':
+        if item[0] != 'input':
             item[3][1] = False
 
     inputs_to = [[] for _ in range(len(circuit.items))]
@@ -138,7 +138,7 @@ def tick(circuit:Circuit, rendered_circuit:tuple) -> None:
         inputs_to[dst].append(src)
 
     for idx, sources in enumerate(inputs_to):
-        if circuit.items[idx][0] == 'Input':
+        if circuit.items[idx][0] == 'input':
             continue
 
         if sources:
@@ -148,9 +148,9 @@ def tick(circuit:Circuit, rendered_circuit:tuple) -> None:
         item[3][0] = item[3][1]
 
         try:
-            if item[0] == 'Input':
+            if item[0] == 'input':
                 rendered_circuit[0][idx].configure(image=INPUT_ON if item[3][0] else INPUT_OFF)
-            elif item[0] == 'Output':
+            elif item[0] == 'output':
                 rendered_circuit[0][idx].configure(image=OUTPUT_ON if item[3][0] else OUTPUT_OFF)
             else:
                 ...

@@ -8,14 +8,14 @@ A logic simulator made with Tkinter.
 `cwires = [[Idx0,Idx1], [Idx0,Idx1], [Idx0,Idx1]]`
 
 ## Features
-- Input switch
+- Input switch `input`
 
-- Output switch
+- Output switch `output`
 
-- OR
+- OR `OR`
 
-- AND (work-in-progress)
+- AND (work-in-progress) `AND`
 
-- XOR (work-in-progress)
+- XOR (work-in-progress) `XOR`
 
-- NOT (work-in-progress)
+- NOT (work-in-progress) `NOT`
