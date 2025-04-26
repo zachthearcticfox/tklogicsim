@@ -18,6 +18,15 @@ def bitwiseNOT(a:bool) -> bool:
 def bitwiseXOR(a:bool, b:bool) -> bool:
     return a ^ b
 
+def blockToCallable(block:str) -> callable:
+    match block:
+        case 'AND': return bitwiseAND
+        case 'XOR': return bitwiseXOR
+        case 'NOT': return bitwiseNOT
+        case _:
+            return None
+            print('You are trying to get a block which either doesn\'t have a function, or doesnt exist')
+
 class TkLogicSimError(BaseException):
     def __init__(self, msg):
         self.msg = msg
@@ -35,16 +44,16 @@ class Circuit:
     def add_block(self, block: str, position: list) -> None:
         self.items.append((block, position, []))
 
-tpsstr = input('Enter TPS [15]: ')
-if tpsstr == '': tpsstr = 15
+tpsstr = input('Enter TPS [25]: ')
+if tpsstr == '': tpsstr = 25
 tps = int(tpsstr) # Max Ticks / Second
 
 root = tk.Tk()
 root.geometry('768x512')
 root.title('tk-logicsim')
-root.configure(bg='#000000') 
+root.configure(bg='#000000')
 
-if tps > 20: raise TkLogicSimError(f'TPS is too high. ({tps})')
+if tps > 25000: raise TkLogicSimError(f'TPS is too high. ({tps})')
 if tps < 1: raise TkLogicSimError(f'TPS is too low ({tps})')
 
 te = 0 # Ticks Elapsed
@@ -59,7 +68,7 @@ XOR = ImageTk.PhotoImage(Image.open('images/xor.png').resize((50,50)))
 NOT = ImageTk.PhotoImage(Image.open('images/not.png').resize((50,50)))
 OR = ImageTk.PhotoImage(Image.open('images/or.png').resize((50,50)))
 
-canvas = tk.Canvas(root, width=8192, height=8192, bg='black')
+canvas = tk.Canvas(root, width=8192, height=8192, bg='black', highlightthickness=0, bd=0)
 canvas.place(relx=0, rely=0, relwidth=1, relheight=1, anchor=tk.NW)
 root.tk.call('lower', str(canvas))
 
@@ -73,21 +82,21 @@ def render(circuit: Circuit) -> tuple:
     c = 0
     for i in circuit.items:
         if i[0] == 'input' and not i[3][0]:
-            loaded_blocks[c] = tk.Button(root, image=INPUT_OFF)
+            loaded_blocks[c] = tk.Button(root, image=INPUT_OFF, highlightthickness=0, borderwidth=0)
         elif i[0] == 'output' and not i[3][0]:
-            loaded_blocks[c] = tk.Button(root, image=OUTPUT_OFF)
+            loaded_blocks[c] = tk.Button(root, image=OUTPUT_OFF, highlightthickness=0, borderwidth=0)
         if i[0] == 'input' and i[3][0]:
-            loaded_blocks[c] = tk.Button(root, image=INPUT_ON)
+            loaded_blocks[c] = tk.Button(root, image=INPUT_ON, highlightthickness=0, borderwidth=0)
         elif i[0] == 'output' and i[3][0]:
-            loaded_blocks[c] = tk.Button(root, image=OUTPUT_ON)
+            loaded_blocks[c] = tk.Button(root, image=OUTPUT_ON, highlightthickness=0, borderwidth=0)
         elif i[0] == 'AND':
-            loaded_blocks[c] = tk.Button(root, image=AND)
+            loaded_blocks[c] = tk.Button(root, image=AND, highlightthickness=0, borderwidth=0)
         elif i[0] == 'XOR':
-            loaded_blocks[c] = tk.Button(root, image=XOR)
+            loaded_blocks[c] = tk.Button(root, image=XOR, highlightthickness=0, borderwidth=0)
         elif i[0] == 'NOT':
-            loaded_blocks[c] = tk.Button(root, image=NOT)
+            loaded_blocks[c] = tk.Button(root, image=NOT, highlightthickness=0, borderwidth=0)
         elif i[0] == 'OR':
-            loaded_blocks[c] = tk.Button(root, image=OR)
+            loaded_blocks[c] = tk.Button(root, image=OR, highlightthickness=0, borderwidth=0)
 
         loaded_blocks[c].place(x=i[1], y=i[2])
 
