@@ -37,21 +37,59 @@ class Circuit:
             raise TkLogicSimError(f'Pre-items or Pre-wires are not a list')
         self.items = pre_items
         self.wires = pre_wires
-    
-    def add_wire(self, item1: int, item2: int) -> None:
-        self.wires.append((item1, item2, []))
-    
-    def add_block(self, block: str, position: list) -> None:
-        self.items.append((block, position, []))
 
 tpsstr = input('Enter TPS [25]: ')
 if tpsstr == '': tpsstr = 25
 tps = int(tpsstr) # Max Ticks / Second
 
+first_click = None
+second_click = None
+mode = 'interact'
+block = 'input'
+
+def enableBuild(event=None):
+    global mode
+    mode = 'build'
+
+def enableInteract(event=None):
+    global mode
+    mode = 'interact'
+
+def enableWire(event=None):
+    global mode
+    mode = 'wire'
+
+def on_click(event=None, block_idx=None) -> None:
+    global tk_rendered, mode, block, first_click, second_click
+    print(f'click at (x: {event.x}, y: {event.y}) (mode: {mode})')
+    if mode == 'build':
+        main_circuit.items.append([block,event.x,event.y,[False,False]])
+        tk_rendered[0].append(None)
+        tk_rendered = render(main_circuit)
+
+def show_popup():
+    popup = tk.Toplevel()
+    popup.title("Controls")
+    popup.geometry("300x150")
+    label = tk.Label(popup, text="Controls:\n[Ctrl+1] to switch to build mode\n[Ctrl+2] to switch to interact mode", font=("Arial", 12))
+    label.pack(pady=20)
+    popup.after(5000, popup.destroy)
+    
+    close_button = tk.Button(popup, text="Close", command=popup.destroy)
+    close_button.pack()
+
 root = tk.Tk()
 root.geometry('768x512')
 root.title('tk-logicsim')
 root.configure(bg='#000000')
+root.focus_force()
+
+root.bind('<Button-1>', on_click)
+root.bind('<Control-Key-1>', enableBuild)
+root.bind('<Control-Key-2>', enableInteract)
+root.bind('<Control-Key-3>', enableWire)
+
+root.after(100, show_popup)
 
 if tps > 25000: raise TkLogicSimError(f'TPS is too high. ({tps})')
 if tps < 1: raise TkLogicSimError(f'TPS is too low ({tps})')
@@ -72,9 +110,11 @@ canvas = tk.Canvas(root, width=8192, height=8192, bg='black', highlightthickness
 canvas.place(relx=0, rely=0, relwidth=1, relheight=1, anchor=tk.NW)
 root.tk.call('lower', str(canvas))
 
-print('TK-Logicsim started')
+print('TK-Logicsim started\n')
 
-def render(circuit: Circuit) -> tuple:
+print('Controls:\n[Ctrl+1] to switch to build mode\n[Ctrl+2] to switch to interact mode\n')
+
+def render(circuit: Circuit, verbose:bool=False) -> tuple:
     ##########
     #Blocks#
     ##########
@@ -108,21 +148,21 @@ def render(circuit: Circuit) -> tuple:
     #Wires#
     #########
     loaded_wires = []
-    print('Render: ', end='')
+    print('Render: ', end='') if verbose else ...
     for i in circuit.wires:
         xy_input_a = (circuit.items[i[0]][1], circuit.items[i[0]][2])
         xy_output_b = (circuit.items[i[1]][1], circuit.items[i[1]][2])
-        print(xy_input_a, xy_output_b, sep=', ', end=' - ')
+        print(xy_input_a, xy_output_b, sep=', ', end=' - ') if verbose else ...
         loaded_wires.append(canvas.create_line(xy_input_a[0]+50,xy_input_a[1]+25,xy_output_b[0]+50,xy_output_b[1]+25, width=2, fill='#ffffff'))
-    print('Render End')
+    print('Render End') if verbose else ...
 
     return (loaded_blocks, loaded_wires)
 
-citems = [['input',35,35,[False,False]], ['input',35,135,[False,False]], ['OR',135,85,[False,False]], ['output',235,85,[False,False]]] # i0 (top), i1 (bottom), o0 (output)
-cwires = [[0,2], [1,2], [2,3]]
+init_citems = [['input',35,35,[False,False]], ['input',35,135,[False,False]], ['OR',135,85,[False,False]], ['output',235,85,[False,False]]] # i0 (top), i1 (bottom), o0 (output)
+init_cwires = [[0,2], [1,2], [2,3]]
 
-main_circuit = Circuit(citems, cwires)
-tk_rendered = render(main_circuit)
+main_circuit = Circuit(init_citems, init_cwires)
+tk_rendered = render(main_circuit, True)
 
 def toggle_input_or_output(idx:int, circuit:Circuit) -> None:
     global tk_rendered
@@ -165,6 +205,8 @@ def tick(circuit:Circuit, rendered_circuit:tuple) -> None:
                 ...
         except tk.TclError:
             print('tick: button does not exist, skipping.')
+            pass
+        except Exception as e:
             pass
 
 
