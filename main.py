@@ -4,29 +4,6 @@ import time
 import threading
 import json
 
-def bitwiseAND(a:bool, b:bool) -> bool:
-    return a and b
-
-"""
-def bitwiseOR(a:bool, b:bool) -> bool:
-    return a or b
-"""
-
-def bitwiseNOT(a:bool) -> bool:
-    return not a
-
-def bitwiseXOR(a:bool, b:bool) -> bool:
-    return a ^ b
-
-def blockToCallable(block:str) -> callable:
-    match block:
-        case 'AND': return bitwiseAND
-        case 'XOR': return bitwiseXOR
-        case 'NOT': return bitwiseNOT
-        case _:
-            return None
-            print('You are trying to get a block which either doesn\'t have a function, or doesnt exist')
-
 class TkLogicSimError(BaseException):
     def __init__(self, msg):
         self.msg = msg
@@ -158,7 +135,7 @@ def render(circuit: Circuit, verbose:bool=False) -> tuple:
 
     return (loaded_blocks, loaded_wires)
 
-init_citems = [['input',35,35,[False,False]], ['input',35,135,[False,False]], ['OR',135,85,[False,False]], ['output',235,85,[False,False]]] # i0 (top), i1 (bottom), o0 (output)
+init_citems = [['input',35,35,[False,False]], ['input',35,135,[False,False]], ['XOR',135,35,[False,False]], ['output',235,35,[False,False]]] # i0 (top), i1 (bottom), o0 (output)
 init_cwires = [[0,2], [1,2], [2,3]]
 
 main_circuit = Circuit(init_citems, init_cwires)
@@ -190,8 +167,18 @@ def tick(circuit:Circuit, rendered_circuit:tuple) -> None:
         if circuit.items[idx][0] == 'input':
             continue
 
-        if sources:
+        if sources and circuit.items[idx][0] != 'AND' and circuit.items[idx][0] != 'NOT' and circuit.items[idx][0] != 'XOR':
             circuit.items[idx][3][1] = any(circuit.items[src][3][0] for src in sources)
+
+        ## Logic
+        if circuit.items[idx][0] == 'AND':
+            if circuit.items[sources[0]][3][0] and circuit.items[sources[1]][3][0]:
+                circuit.items[idx][3][1] = True
+        elif circuit.items[idx][0] == 'NOT':
+            circuit.items[idx][3][1] = not circuit.items[sources[0]][3][0]
+        elif circuit.items[idx][0] == 'XOR':
+            if circuit.items[sources[0]][3][0] ^ circuit.items[sources[1]][3][0]:
+                circuit.items[idx][3][1] = True
 
     for idx, item in enumerate(circuit.items):
         item[3][0] = item[3][1]
