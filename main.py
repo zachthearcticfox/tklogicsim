@@ -36,6 +36,16 @@ def enableWire(event=None):
     global mode
     mode = 'wire'
 
+def changeBlock(event=None):
+    global block
+    match block:
+        case 'input': block = 'output'
+        case 'output': block = 'OR'
+        case 'OR': block = 'AND'
+        case 'AND': block = 'NOT'
+        case 'NOT': block = 'XOR'
+        case 'XOR': block = 'input'
+
 def on_click(event=None, block_idx=None) -> None:
     global tk_rendered, mode, block, first_click, second_click
     print(f'click at (x: {event.x}, y: {event.y}) (mode: {mode})')
@@ -54,6 +64,7 @@ root.bind('<Button-1>', on_click)
 root.bind('<Control-Key-1>', enableBuild)
 root.bind('<Control-Key-2>', enableInteract)
 root.bind('<Control-Key-3>', enableWire)
+root.bind('<Control-Key-b>', changeBlock)
 
 if tps > 25000: raise TkLogicSimError(f'TPS is too high. ({tps})')
 if tps < 1: raise TkLogicSimError(f'TPS is too low ({tps})')
@@ -76,7 +87,7 @@ root.tk.call('lower', str(canvas))
 
 print('TK-Logicsim started\n')
 
-print('Controls:\n[Ctrl+1] to switch to build mode\n[Ctrl+2] to switch to interact mode\n')
+print('Controls:\n[Ctrl+1] to switch to build mode\n[Ctrl+2] to switch to interact mode\n[Ctrl+B] changes the block\n')
 
 def render(circuit: Circuit, verbose:bool=False) -> tuple:
     ##########
@@ -158,14 +169,17 @@ def tick(circuit:Circuit, rendered_circuit:tuple) -> None:
             circuit.items[idx][3][1] = any(circuit.items[src][3][0] for src in sources)
 
         ## Logic
-        if circuit.items[idx][0] == 'AND':
-            if circuit.items[sources[0]][3][0] and circuit.items[sources[1]][3][0]:
-                circuit.items[idx][3][1] = True
-        elif circuit.items[idx][0] == 'NOT':
-            circuit.items[idx][3][1] = not circuit.items[sources[0]][3][0]
-        elif circuit.items[idx][0] == 'XOR':
-            if circuit.items[sources[0]][3][0] ^ circuit.items[sources[1]][3][0]:
-                circuit.items[idx][3][1] = True
+        try:
+            if circuit.items[idx][0] == 'AND':
+                if circuit.items[sources[0]][3][0] and circuit.items[sources[1]][3][0]:
+                    circuit.items[idx][3][1] = True
+            elif circuit.items[idx][0] == 'NOT':
+                circuit.items[idx][3][1] = not circuit.items[sources[0]][3][0]
+            elif circuit.items[idx][0] == 'XOR':
+                if circuit.items[sources[0]][3][0] ^ circuit.items[sources[1]][3][0]:
+                    circuit.items[idx][3][1] = True
+        except IndexError:
+            pass
 
     for idx, item in enumerate(circuit.items):
         item[3][0] = item[3][1]
