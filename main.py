@@ -44,17 +44,6 @@ def on_click(event=None, block_idx=None) -> None:
         tk_rendered[0].append(None)
         tk_rendered = render(main_circuit)
 
-def show_popup():
-    popup = tk.Toplevel()
-    popup.title("Controls")
-    popup.geometry("300x150")
-    label = tk.Label(popup, text="Controls:\n[Ctrl+1] to switch to build mode\n[Ctrl+2] to switch to interact mode", font=("Arial", 12))
-    label.pack(pady=20)
-    popup.after(5000, popup.destroy)
-    
-    close_button = tk.Button(popup, text="Close", command=popup.destroy)
-    close_button.pack()
-
 root = tk.Tk()
 root.geometry('768x512')
 root.title('tk-logicsim')
@@ -65,8 +54,6 @@ root.bind('<Button-1>', on_click)
 root.bind('<Control-Key-1>', enableBuild)
 root.bind('<Control-Key-2>', enableInteract)
 root.bind('<Control-Key-3>', enableWire)
-
-root.after(100, show_popup)
 
 if tps > 25000: raise TkLogicSimError(f'TPS is too high. ({tps})')
 if tps < 1: raise TkLogicSimError(f'TPS is too low ({tps})')
@@ -135,8 +122,8 @@ def render(circuit: Circuit, verbose:bool=False) -> tuple:
 
     return (loaded_blocks, loaded_wires)
 
-init_citems = [['input',35,35,[False,False]], ['input',35,135,[False,False]], ['XOR',135,35,[False,False]], ['output',235,35,[False,False]]] # i0 (top), i1 (bottom), o0 (output)
-init_cwires = [[0,2], [1,2], [2,3]]
+init_citems = [['input',35,35,[False,False]], ['input',35,135,[False,False]], ['AND',135,35,[False,False]], ['XOR',135,135,[False,False]], ['output',235,135,[False,False]], ['output',235,35,[False,False]]]
+init_cwires = [[0,2], [0,3], [1,2], [1,3], [3,4], [2,5]]
 
 main_circuit = Circuit(init_citems, init_cwires)
 tk_rendered = render(main_circuit, True)
