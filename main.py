@@ -133,8 +133,8 @@ def render(circuit: Circuit, verbose:bool=False) -> tuple:
 
     return (loaded_blocks, loaded_wires)
 
-init_citems = [['input',35,35,[False,False]], ['input',35,135,[False,False]], ['AND',135,35,[False,False]], ['XOR',135,135,[False,False]], ['output',235,135,[False,False]], ['output',235,35,[False,False]]]
-init_cwires = [[0,2], [0,3], [1,2], [1,3], [3,4], [2,5]]
+init_citems = [['input',35,35,[False,False]], ['input',35,135,[False,False]], ['input',35,235,[False,False]], ['AND',135,35,[False,False]], ['XOR',135,135,[False,False]], ['XOR',235,135,[False,False]], ['AND',235,35,[False,False]], ['output',335,35,[False,False]], ['output',335,135,[False,False]]]
+init_cwires = [[0,3], [1,3], [3,7], [6,7], [4,6], [2,6], [0,4], [1,4], [4,5], [2,5], [5,8]]
 
 main_circuit = Circuit(init_citems, init_cwires)
 tk_rendered = render(main_circuit, True)
